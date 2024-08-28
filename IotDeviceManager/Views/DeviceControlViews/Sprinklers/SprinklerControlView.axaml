@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:IotDeviceManager.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="IotDeviceManager.Views.SprinklerControlView"
+             x:DataType="vm:MainViewModel">
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:MainViewModel />
+  </Design.DataContext>
+  <WrapPanel Orientation="Vertical">
+    <Grid ColumnDefinitions="1.5*, 1.5*" RowDefinitions="1.25*, 1.25*, 1.25*">
+      <TextBlock Text="Zone Number: "
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Right"
+                 Grid.Row="0" Grid.Column="0"/>
+      <ComboBox x:Name="ZoneNumberComboBox" SelectedIndex="0"
+                MaxDropDownHeight="300"
+                Width="120"
+                Grid.Row="0" Grid.Column="1"
+                ItemsSource="{Binding ZoneNumbers}">
+        <!-- <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding ZoneNumber}"/>
+          </DataTemplate>
+        </ComboBox.ItemTemplate> -->
+      </ComboBox>
+
+      <TextBlock Text="Duration (min): "
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Right"
+                 Grid.Row="1" Grid.Column="0"/>
+      <NumericUpDown x:Name="DurationNumericUpDown"
+                     Value="10"
+                     Minimum="0" Maximum="120" Increment="1"
+                     Width="120"
+                     Grid.Row="1" Grid.Column="1"/>
+
+      <Button Grid.Row="2" Grid.Column="0"
+              Content="Center" Click="OnSubmitJobClicked">
+        Submit Job
+      </Button>
+    </Grid>
+    
+    <!-- <ItemsControl ItemsSource="{Binding Jobs}">
+      <ItemsControl.ItemTemplate>
+      <DataTemplate>
+        <Border Margin="0,10,0,0"
+                CornerRadius="5"
+                BorderBrush="Gray" BorderThickness="1"
+                Padding="5">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding ZoneNumber}"/>
+            <TextBlock Margin="5 0" FontWeight="Bold" 
+                       Text="{Binding Duration_s}"/>
+          </StackPanel>
+        </Border>
+      </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl> -->
+  </WrapPanel>
+</UserControl>
