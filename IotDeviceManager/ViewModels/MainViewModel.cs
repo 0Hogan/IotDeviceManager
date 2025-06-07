@@ -7,6 +7,8 @@ using MQTTnet.Client;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Exceptions;
+using Avalonia.Threading;
+using System.Collections.Generic;
 
 namespace IotDeviceManager.ViewModels;
 
@@ -31,13 +33,12 @@ public class MainViewModel : ViewModelBase
         mqttClient = mqttFactory.CreateMqttClient();
         _ = initMqtt();
 
-
         for (UInt16 i = 1; i < 10; i++)
         {
             Jobs.Add(new SprinklerJob(i, 5*60));
             ZoneNumbers.Add(i);
         }
-
+        RequestSprinklerQueueStatus();
         // SubmitNewSprinklerJob = ReactiveCommand.Create<Object>(SubmitSprinklerJob);
     }
 
@@ -97,6 +98,14 @@ public class MainViewModel : ViewModelBase
         sprinklersCmdPub?.Publish(msg);
     }
 
+    public void RequestSprinklerQueueStatus()
+    {
+        var msg = new SprinklersCmdMsg();
+        msg.Cmd = SprinklersCmdMsg.Command.RequestQueueStatus;
+        Console.WriteLine("Requesting current status of the sprinkler job queue.");
+        sprinklersCmdPub?.Publish(msg);
+    }
+
     private async Task initMqtt()
     {
         var mqttClientOptions = new MqttClientOptionsBuilder()
@@ -113,11 +122,11 @@ public class MainViewModel : ViewModelBase
             var connectResult = await mqttClient.ConnectAsync(mqttClientOptions);
             isMqttInitialized = connectResult.ResultCode == MqttClientConnectResultCode.Success;
         }
-        catch(OperationCanceledException)
+        catch (OperationCanceledException)
         {
             Console.WriteLine($"Unable to connect to mqttClient (Operation Canceled)");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Console.WriteLine($"Caught some other exception: {e.Message}");
         }
@@ -130,10 +139,31 @@ public class MainViewModel : ViewModelBase
 
     private void onSprinklersStatusMsg(string payload)
     {
-        Console.WriteLine($"I heard: \"{payload}\"");
+        var msg = new SprinklersStatusMsg(payload);
+        // Jobs = new ObservableCollection<SprinklerJob>(msg.Jobs);
+        Jobs.Clear();
+        foreach (var job in msg.Jobs)
+        {
+            Console.WriteLine($"Adding job: {job.ZoneNumber} for {job.Duration_s} seconds");
+            Jobs.Add(job);
+        }
+        // try
+        // {
+        //     Dispatcher.UIThread.Post(() => SetJobs(msg.Jobs));
+        //     // _ = Dispatcher.UIThread.InvokeAsync(GetText);
+        // }
+        // catch (Exception e)
+        // {
+        //     Console.WriteLine($"Caught exception while trying to update Jobs collection: {e.Message}");
+        // }
     }
 
-    private bool testMode = true;
+    public void SetJobs(List<SprinklerJob> updatedJobs)
+    {
+        Jobs.Clear();
+        Jobs = new ObservableCollection<SprinklerJob>(updatedJobs);
+    }
+
 
     private bool isMqttInitialized = false;
     private IMqttClient mqttClient;

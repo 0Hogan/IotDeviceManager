@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 public class SprinklerJob
 {
@@ -10,5 +11,5 @@ public class SprinklerJob
     }
 
     public UInt16 ZoneNumber { get; set; }
-    public UInt64 Duration_s {get; set; }
+    public UInt64 Duration_s { get; set; }
 }

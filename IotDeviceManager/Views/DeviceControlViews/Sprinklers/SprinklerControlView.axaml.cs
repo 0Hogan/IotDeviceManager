@@ -17,7 +17,7 @@ public partial class SprinklerControlView : UserControl
     {
         UInt16 zoneNumber = Convert.ToUInt16(ZoneNumberComboBox.SelectedItem ?? 0xff);
         UInt64 duration_s = Convert.ToUInt64((DurationNumericUpDown.Value ?? 0) * 60);
-        
+
         if (this.DataContext is not null)
         {
             ((MainViewModel)this.DataContext).SubmitSprinklerJob(zoneNumber, duration_s);
@@ -28,8 +28,16 @@ public partial class SprinklerControlView : UserControl
         // msg.Cmd = SprinklersCmdMsg.Command.EnqueueJob;
         // msg.ZoneNumber = zoneNumber;
         // msg.Duration_s = duration_s;
-        
+
         // Console.WriteLine(msg.GetPayload());
         // Console.WriteLine($"Submitting job to run zone #{zoneNumber} for {duration_s} minutes.");
     }    
+
+    public void OnRefreshJobsClicked(object sender, RoutedEventArgs args)
+    {
+        if (this.DataContext is not null)
+        {
+            ((MainViewModel)this.DataContext).RequestSprinklerQueueStatus();
+        }
+    }
 }
