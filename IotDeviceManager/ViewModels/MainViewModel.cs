@@ -35,11 +35,8 @@ public class MainViewModel : ViewModelBase
 
         for (UInt16 i = 1; i < 10; i++)
         {
-            Jobs.Add(new SprinklerJob(i, 5*60));
             ZoneNumbers.Add(i);
         }
-        RequestSprinklerQueueStatus();
-        // SubmitNewSprinklerJob = ReactiveCommand.Create<Object>(SubmitSprinklerJob);
     }
 
     public void SubmitSprinklerJob(UInt16 zoneNumber, UInt64 duration_s)
@@ -90,9 +87,13 @@ public class MainViewModel : ViewModelBase
 
     public void RemoveSprinklerJobByIndex(UInt16 index)
     {
-        /// @todo Ensure there are at least index + 1 jobs.
+        if (index >= Jobs.Count)
+        {
+            Console.WriteLine($"Invalid index {index} for removing a job!  Not removing any jobs.");
+            return; // @todo Throw an exception here instead, so that we can display an error message to the user.
+        }
         var msg = new SprinklersCmdMsg();
-        msg.Cmd = SprinklersCmdMsg.Command.DequeueJobByIndex; ///< @todo Add DequeueJobByIndex Command enum.
+        msg.Cmd = SprinklersCmdMsg.Command.DequeueJobByIndex;
         msg.Duration_s = index; ///< @todo Should we be borrowing this field? It shouldn't hurt anything, but it is lying...
         Console.WriteLine($"Removing Sprinkler Job #{index}");
         sprinklersCmdPub?.Publish(msg);
@@ -103,7 +104,12 @@ public class MainViewModel : ViewModelBase
         var msg = new SprinklersCmdMsg();
         msg.Cmd = SprinklersCmdMsg.Command.RequestQueueStatus;
         Console.WriteLine("Requesting current status of the sprinkler job queue.");
-        sprinklersCmdPub?.Publish(msg);
+        if (sprinklersCmdPub is null)
+        {
+            Console.WriteLine("sprinklersCmdPub is null!  Not publishing request for queue status.");
+            return; // @todo Throw an exception here instead, so that we can display an error message to the user.
+        }
+        sprinklersCmdPub.Publish(msg);
     }
 
     private async Task initMqtt()
@@ -135,6 +141,8 @@ public class MainViewModel : ViewModelBase
         sprinklersStatusSub = new(mqttClient);
 
         sprinklersStatusSub.Subscribe(onSprinklersStatusMsg);
+
+        RequestSprinklerQueueStatus();
     }
 
     private void onSprinklersStatusMsg(string payload)

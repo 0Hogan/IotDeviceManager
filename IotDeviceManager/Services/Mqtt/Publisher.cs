@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client;
 
@@ -20,6 +21,11 @@ public class Publisher<msgType> where msgType : Message, new()
                                     .WithPayload(msg.GetPayload())
                                     .Build();
 
+        if (!mqttClient.IsConnected)
+        {
+            Console.WriteLine("Waiting for mqttClient to be connected...");
+            await Task.Delay(250);
+        }
         await mqttClient.PublishAsync(mqttMsg, CancellationToken.None);
     }
 

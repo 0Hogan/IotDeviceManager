@@ -22,16 +22,49 @@ public partial class SprinklerControlView : UserControl
         {
             ((MainViewModel)this.DataContext).SubmitSprinklerJob(zoneNumber, duration_s);
         }
-        // MainViewModel vm = 
-        // // No need to use the following if I can send the above into the ViewModel...
-        // SprinklersCmdMsg msg = new();
-        // msg.Cmd = SprinklersCmdMsg.Command.EnqueueJob;
-        // msg.ZoneNumber = zoneNumber;
-        // msg.Duration_s = duration_s;
-
-        // Console.WriteLine(msg.GetPayload());
-        // Console.WriteLine($"Submitting job to run zone #{zoneNumber} for {duration_s} minutes.");
     }    
+
+    public void OnPauseQueueClicked(object sender, RoutedEventArgs args)
+    {
+        if (this.DataContext is not null)
+        {
+            ((MainViewModel)this.DataContext).PauseSprinklerQueueExecution();
+        }
+    }
+
+    public void OnResumeQueueClicked(object sender, RoutedEventArgs args)
+    {
+        if (this.DataContext is not null)
+        {
+            ((MainViewModel)this.DataContext).ResumeSprinklerQueueExecution();
+        }
+    }
+
+    public void OnStopQueueClicked(object sender, RoutedEventArgs args)
+    {
+        if (this.DataContext is not null)
+        {
+            ((MainViewModel)this.DataContext).StopSprinklerQueueExecution();
+        }
+    }
+
+    public void OnRemoveJobClicked(object sender, RoutedEventArgs args)
+    {
+        if (this.DataContext is not null)
+        {
+            if (CurrentJobs.SelectedItem is null)
+            {
+                Console.WriteLine("No job selected to remove!");
+                return; // @todo Display an error message to the user.
+            }
+            else
+            {
+                UInt16 jobIndex = Convert.ToUInt16(CurrentJobs.SelectedIndex);
+                Console.WriteLine($"Removing job at index {jobIndex}.");
+                ((MainViewModel)this.DataContext).RemoveSprinklerJobByIndex(jobIndex);
+            }
+        }
+    }
 
     public void OnRefreshJobsClicked(object sender, RoutedEventArgs args)
     {
